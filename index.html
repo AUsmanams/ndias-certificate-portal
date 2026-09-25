@@ -1,1 +1,47 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="NDIAS 2026 Certificate Verification and Download Portal"><title>NDIAS 2026 | Certificate Verification</title><link rel="stylesheet" href="styles.css"></head><body><main class="page"><section class="card"><div class="brand"><div class="brand-mark">N</div><div><div class="eyebrow">NAZAS DIGITAL INNOVATION & AI SUMMIT</div><h1>NDIAS 2026</h1></div></div><div class="divider"></div><h2>Certificate Verification & Download</h2><p class="lead">Enter your Participant ID to check your certificate status.</p><form id="verifyForm" autocomplete="off"><label for="participantId">Participant ID</label><div class="input-row"><input id="participantId" name="participantId" placeholder="NDIAS/1.0/26/001" spellcheck="false" required><button type="submit" id="checkBtn">Check Certificate</button></div></form><div id="result" class="result" aria-live="polite"></div><p class="note">Certificates are available only to participants who meet the official NDIAS eligibility requirements.</p></section><footer>NAZAS • NDIAS 2026 • Certificate Verification System</footer></main><script src="app.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="NDIAS 2026 Certificate Verification and Download Portal">
+<title>NDIAS 2026 | Certificate Verification</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<main class="page">
+<section class="card">
+<div class="brand">
+  <div class="brand-mark">N</div>
+  <div>
+    <div class="eyebrow">NAZAS DIGITAL INNOVATION & AI SUMMIT</div>
+    <h1>NDIAS 2026</h1>
+  </div>
+</div>
+<div class="divider"></div>
+<h2>Certificate Verification & Download</h2>
+<p class="lead">Enter your Participant ID to verify and download your official NDIAS 2026 certificate.</p>
+<form id="verifyForm" autocomplete="off">
+<label for="participantId">Participant ID</label>
+<div class="input-row">
+<input id="participantId" name="participantId" placeholder="NDIAS/1.0/26/001" spellcheck="false" required>
+<button type="submit" id="checkBtn">Check Certificate</button>
+</div>
+</form>
+<div id="result" class="result" aria-live="polite"></div>
+<div class="certificate-actions">
+<img id="certificatePreview" class="certificate-preview" alt="Generated NDIAS 2026 certificate preview" hidden>
+<div class="downloads">
+<a id="downloadPng" class="download" hidden>Download PNG</a>
+<button id="downloadPdf" class="download secondary" type="button" hidden>Download PDF</button>
+</div>
+</div>
+<p class="note">Only participants who meet the official NDIAS eligibility requirements can generate a certificate.</p>
+</section>
+<footer>NAZAS • NDIAS 2026 • Official Certificate Verification System</footer>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
