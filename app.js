@@ -6,7 +6,7 @@ const preview = document.getElementById("certificatePreview");
 const downloadPng = document.getElementById("downloadPng");
 const downloadPdf = document.getElementById("downloadPdf");
 
-const REGISTRY_URL = "./data/eligible.txt";
+const REGISTRY_URL = "./data/eligible.json";
 const MASTER_URL = "./assets/ndias-certificate-master.jpg";
 const VERIFY_BASE = "https://ausmanams.github.io/ndias-certificate-portal/";
 let registry = [];
@@ -28,21 +28,11 @@ function show(type, title, message) {
   result.appendChild(box);
 }
 
-function base64ToBytes(base64) {
-  const binary = atob(base64.replace(/\s/g, ""));
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-  return bytes;
-}
-
 async function loadRegistry() {
   const response = await fetch(REGISTRY_URL, { cache: "no-store" });
   if (!response.ok) throw new Error("Registry unavailable");
-  const encoded = await response.text();
-  const compressed = new Blob([base64ToBytes(encoded)]).stream();
-  const decompressed = compressed.pipeThrough(new DecompressionStream("gzip"));
-  const jsonText = await new Response(decompressed).text();
-  registry = JSON.parse(jsonText);
+  registry = await response.json();
+  if (!Array.isArray(registry)) throw new Error("Invalid registry");
 }
 
 function loadImage(src) {
