@@ -6,7 +6,7 @@ const preview = document.getElementById("certificatePreview");
 const downloadPng = document.getElementById("downloadPng");
 const downloadPdf = document.getElementById("downloadPdf");
 
-const REGISTRY_URL = "data/eligible.gz.b64";
+const REGISTRY_URL = "./data/eligible.txt";
 const MASTER_URL = "assets/ndias-certificate-master.jpg";
 const VERIFY_BASE = "https://ausmanams.github.io/ndias-certificate-portal/";
 let registry = [];
