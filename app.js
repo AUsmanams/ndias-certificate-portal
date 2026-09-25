@@ -95,13 +95,22 @@ async function createCertificate(person) {
   ctx.lineWidth = 2;
   ctx.strokeRect(64, 748, 138, 132);
 
-  const qrCanvas = document.createElement("canvas");
-  await QRCode.toCanvas(qrCanvas, VERIFY_BASE + "?id=" + encodeURIComponent(person.participantId), {
-    width: 120,
-    margin: 1,
-    errorCorrectionLevel: "M"
-  });
-  ctx.drawImage(qrCanvas, 73, 755, 120, 120);
+  const qr = qrcode(0, "M");
+  qr.addData(VERIFY_BASE + "?id=" + encodeURIComponent(person.participantId));
+  qr.make();
+  const modules = qr.getModuleCount();
+  const qrSize = 120;
+  const cell = qrSize / modules;
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(73, 755, qrSize, qrSize);
+  ctx.fillStyle = "#000000";
+  for (let row = 0; row < modules; row++) {
+    for (let col = 0; col < modules; col++) {
+      if (qr.isDark(row, col)) {
+        ctx.fillRect(73 + col * cell, 755 + row * cell, Math.ceil(cell), Math.ceil(cell));
+      }
+    }
+  }
 
   ctx.fillStyle = "#12251a";
   ctx.font = "700 12px Arial, sans-serif";
