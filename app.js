@@ -17,6 +17,7 @@ const VERIFY_BASE = "https://ausmanams.github.io/ndias-certificate-portal/";
 const PAYMENT_API = "https://ndias-payment-api.vercel.app";
 let registry = [];
 let certificatePrice = 500;
+let certificateRequestsEnabled = false;
 
 function formatNaira(amount) {
   return "₦" + Number(amount || 0).toLocaleString("en-NG");
@@ -28,6 +29,20 @@ async function loadCertificatePrice() {
     const data = await response.json();
     if (response.ok && data.ok && Number(data.amount) > 0) {
       certificatePrice = Number(data.amount);
+      certificateRequestsEnabled = data.enabled === true;
+      const toggle = document.getElementById("requestToggle");
+      const form = document.getElementById("requestForm");
+      if (!certificateRequestsEnabled) {
+        toggle.hidden = false;
+        toggle.disabled = true;
+        toggle.textContent = "Certificate Requests — Payment Not Yet Live";
+        form.hidden = true;
+        requestButton.disabled = true;
+      } else {
+        toggle.disabled = false;
+        toggle.innerHTML = "Request a Certificate — <span id=\"requestPriceToggle\">" + formatNaira(certificatePrice) + "</span>";
+        requestButton.disabled = false;
+      }
       document.getElementById("requestPriceToggle").textContent = formatNaira(certificatePrice);
       document.getElementById("requestPriceText").textContent = formatNaira(certificatePrice);
       document.getElementById("requestPriceButton").textContent = formatNaira(certificatePrice);
@@ -180,6 +195,10 @@ async function verifyAndGenerate(id) {
 
 async function startCertificateRequest(event) {
   event.preventDefault();
+  if (!certificateRequestsEnabled) {
+    show("error", "Certificate Requests Not Yet Available", "Payment will be enabled after NDIAS Paystack payments go live.", requestResult);
+    return;
+  }
   requestButton.disabled = true;
   requestButton.textContent = "Preparing payment…";
   requestResult.innerHTML = "";
@@ -222,6 +241,10 @@ async function startCertificateRequest(event) {
 }
 
 async function verifyPaidCertificate(reference) {
+  if (!certificateRequestsEnabled) {
+    show("error", "Certificate Payments Not Yet Live", "Paid certificate requests are temporarily disabled until Paystack Live Mode is activated.");
+    return;
+  }
   show("success", "Checking Payment…", "Please wait while we securely verify your " + formatNaira(certificatePrice) + " payment.");
   preview.hidden = true;
   downloadPng.hidden = true;
@@ -291,6 +314,7 @@ form.addEventListener("submit", async (event) => {
 });
 
 requestToggle.addEventListener("click", () => {
+  if (!certificateRequestsEnabled) return;
   requestForm.hidden = !requestForm.hidden;
   requestToggle.innerHTML = requestForm.hidden
     ? "Request a Certificate — <span id=\"requestPriceToggle\">" + formatNaira(certificatePrice) + "</span>"
