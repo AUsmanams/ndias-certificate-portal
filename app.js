@@ -6,17 +6,23 @@ const preview = document.getElementById("certificatePreview");
 const downloadPng = document.getElementById("downloadPng");
 const downloadPdf = document.getElementById("downloadPdf");
 
+const requestToggle = document.getElementById("requestToggle");
+const requestForm = document.getElementById("requestForm");
+const requestButton = document.getElementById("requestButton");
+const requestResult = document.getElementById("requestResult");
+
 const REGISTRY_URL = "./data/eligible.json";
 const MASTER_URL = "./assets/ndias-certificate-master.jpg";
 const VERIFY_BASE = "https://ausmanams.github.io/ndias-certificate-portal/";
+const PAYMENT_API = "https://ndias-payment-api.vercel.app";
 let registry = [];
 
 function cleanId(value) {
   return value.trim().toUpperCase().replace(/\s+/g, "");
 }
 
-function show(type, title, message) {
-  result.innerHTML = "";
+function show(type, title, message, target = result) {
+  target.innerHTML = "";
   const box = document.createElement("div");
   box.className = "status " + type;
   const strong = document.createElement("strong");
@@ -25,7 +31,7 @@ function show(type, title, message) {
   const p = document.createElement("div");
   p.textContent = message;
   box.appendChild(p);
-  result.appendChild(box);
+  target.appendChild(box);
 }
 
 async function loadRegistry() {
@@ -86,7 +92,7 @@ async function createCertificate(person) {
   ctx.strokeRect(64, 748, 138, 132);
 
   const qr = qrcode(0, "M");
-  qr.addData(VERIFY_BASE + "?id=" + encodeURIComponent(person.participantId));
+  qr.addData(person.verificationUrl || (VERIFY_BASE + "?id=" + encodeURIComponent(person.participantId)));
   qr.make();
   const modules = qr.getModuleCount();
   const qrSize = 120;
@@ -112,18 +118,8 @@ async function createCertificate(person) {
   return canvas;
 }
 
-async function verifyAndGenerate(id) {
-  if (!registry.length) await loadRegistry();
-  const person = registry.find(p => cleanId(p.participantId) === id && p.eligible === true);
-  if (!person) {
-    preview.hidden = true;
-    downloadPng.hidden = true;
-    downloadPdf.hidden = true;
-    show("error", "Certificate Not Available", "No eligible certificate was found for this Participant ID.");
-    return;
-  }
-
-  show("success", "Certificate Verified", "This Participant ID is eligible for an official NDIAS 2026 certificate.");
+async function showCertificate(person, successMessage) {
+  show("success", "Certificate Verified", successMessage);
   const canvas = await createCertificate(person);
   preview.src = canvas.toDataURL("image/jpeg", 0.94);
   preview.hidden = false;
@@ -139,6 +135,113 @@ async function verifyAndGenerate(id) {
     pdf.save(person.certificateNumber + ".pdf");
   };
   downloadPdf.hidden = false;
+}
+
+async function verifyAndGenerate(id) {
+  if (!registry.length) await loadRegistry();
+  const person = registry.find(p => cleanId(p.participantId) === id && p.eligible === true);
+  if (!person) {
+    preview.hidden = true;
+    downloadPng.hidden = true;
+    downloadPdf.hidden = true;
+    show("error", "Certificate Not Available", "No eligible certificate was found for this Participant ID.");
+    return;
+  }
+
+  await showCertificate(
+    person,
+    "This Participant ID is eligible for an official NDIAS 2026 certificate."
+  );
+}
+
+async function startCertificateRequest(event) {
+  event.preventDefault();
+  requestButton.disabled = true;
+  requestButton.textContent = "Preparing payment…";
+  requestResult.innerHTML = "";
+  preview.hidden = true;
+  downloadPng.hidden = true;
+  downloadPdf.hidden = true;
+
+  const formData = new FormData(requestForm);
+  const payload = {
+    name: String(formData.get("name") || "").trim(),
+    email: String(formData.get("email") || "").trim(),
+    phone: String(formData.get("phone") || "").trim(),
+    institution: String(formData.get("institution") || "").trim(),
+    lga: String(formData.get("lga") || "").trim()
+  };
+
+  try {
+    if (!payload.name || !payload.email) {
+      throw new Error("Full name and email are required.");
+    }
+
+    const response = await fetch(PAYMENT_API + "/api/initialize-payment", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+    if (!response.ok || !data.ok || !data.authorization_url) {
+      throw new Error(data.error || data.details || "Unable to start payment.");
+    }
+
+    window.location.href = data.authorization_url;
+  } catch (error) {
+    console.error(error);
+    show("error", "Payment Could Not Start", error.message || "Please try again.", requestResult);
+    requestButton.disabled = false;
+    requestButton.textContent = "Pay ₦500 & Request Certificate";
+  }
+}
+
+async function verifyPaidCertificate(reference) {
+  show("success", "Checking Payment…", "Please wait while we securely verify your ₦500 payment.");
+  preview.hidden = true;
+  downloadPng.hidden = true;
+  downloadPdf.hidden = true;
+
+  const response = await fetch(
+    PAYMENT_API + "/api/verify-payment?reference=" + encodeURIComponent(reference),
+    { cache: "no-store" }
+  );
+  const data = await response.json();
+
+  if (!response.ok || !data.paid) {
+    throw new Error(data.error || "Payment could not be verified.");
+  }
+
+  const metadata = data.metadata || {};
+  const email = data.customer?.email || "";
+  if (!metadata.name || !metadata.email || !email) {
+    throw new Error("The verified payment does not contain the required certificate details.");
+  }
+
+  if (metadata.email.toLowerCase() !== email.toLowerCase()) {
+    throw new Error("Payment details could not be matched to the certificate request.");
+  }
+
+  const shortRef = String(data.reference || reference).slice(-8).toUpperCase();
+  const participantId = "NDIAS/CR/26/" + shortRef;
+  const person = {
+    name: metadata.name,
+    participantId,
+    certificateNumber: "NDIAS-CR-2026-" + shortRef,
+    eligible: true,
+    verificationUrl: VERIFY_BASE + "?payment=" + encodeURIComponent(data.reference || reference)
+  };
+
+  await showCertificate(
+    person,
+    "Payment verified successfully. This certificate request has been approved."
+  );
+
+  requestToggle.hidden = true;
+  requestForm.hidden = true;
+  requestResult.innerHTML = "";
+  history.replaceState({}, document.title, VERIFY_BASE + "?payment=" + encodeURIComponent(data.reference || reference));
 }
 
 form.addEventListener("submit", async (event) => {
@@ -163,8 +266,31 @@ form.addEventListener("submit", async (event) => {
   }
 });
 
+requestToggle.addEventListener("click", () => {
+  requestForm.hidden = !requestForm.hidden;
+  requestToggle.textContent = requestForm.hidden
+    ? "Request a Certificate — ₦500"
+    : "Close Certificate Request";
+  if (!requestForm.hidden) requestForm.querySelector("input")?.focus();
+});
+
+requestForm.addEventListener("submit", startCertificateRequest);
+
 const params = new URLSearchParams(location.search);
-if (params.get("id")) {
+const paymentReference = params.get("reference");
+const paidReference = params.get("payment");
+
+if (paymentReference) {
+  verifyPaidCertificate(paymentReference).catch(error => {
+    console.error(error);
+    show("error", "Payment Verification Failed", error.message || "We could not verify the payment. Please contact NDIAS support.");
+  });
+} else if (paidReference) {
+  verifyPaidCertificate(paidReference).catch(error => {
+    console.error(error);
+    show("error", "Certificate Verification Failed", error.message || "We could not verify this paid certificate.");
+  });
+} else if (params.get("id")) {
   input.value = params.get("id");
   form.requestSubmit();
 }
