@@ -41,12 +41,12 @@
 </div>
 
 <div class="request-divider"></div>
-<button id="requestToggle" class="request-toggle" type="button">Request a Certificate — ₦500</button>
+<button id="requestToggle" class="request-toggle" type="button">Request a Certificate — <span id="requestPriceToggle">₦500</span></button>
 
 <form id="requestForm" class="request-form" hidden>
   <div class="request-heading">
     <h3>Certificate Request</h3>
-    <p>Complete the form below. After submission, you will be redirected to Paystack to make the ₦500 payment.</p>
+    <p>Complete the form below. After submission, you will be redirected to Paystack to make the <span id="requestPriceText">₦500</span> payment.</p>
   </div>
 
   <div class="form-grid">
@@ -78,7 +78,7 @@
 
   <div id="requestResult" class="result" aria-live="polite"></div>
 
-  <button id="requestButton" class="pay-button" type="submit">Pay ₦500 & Request Certificate</button>
+  <button id="requestButton" class="pay-button" type="submit">Pay <span id="requestPriceButton">₦500</span> & Request Certificate</button>
   <p class="payment-note">Payment is processed securely by Paystack. Your card, bank, or transfer details are handled by Paystack and are not stored by this portal.</p>
 </form>
 
