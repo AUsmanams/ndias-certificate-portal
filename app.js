@@ -35,7 +35,7 @@ async function loadCertificatePrice() {
       if (!certificateRequestsEnabled) {
         toggle.hidden = false;
         toggle.disabled = true;
-        toggle.textContent = "Certificate Requests — ₦" + certificatePrice.toLocaleString("en-NG");
+        toggle.textContent = "Paid Certificate Requests — Temporarily Disabled";
         form.hidden = true;
         requestButton.disabled = true;
       } else {
