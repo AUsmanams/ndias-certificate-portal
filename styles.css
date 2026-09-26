@@ -51,3 +51,7 @@ button:disabled{opacity:.65;cursor:wait}
 .footer-copy span{font-size:11px}
 .footer-copy small{font-size:10px;color:#7a867e}
 @media(max-width:700px){.card{padding:28px 20px;border-radius:18px}.official-header{grid-template-columns:58px 1fr 58px;gap:9px}.official-logo-box{width:58px;height:58px}.official-title h1{font-size:16px}.eyebrow{font-size:7px}.official-title span{font-size:9px}.card h2{font-size:25px}.input-row{flex-direction:column}.input-row button{height:50px}.downloads{flex-direction:column}.download{width:100%}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.site-footer{margin-bottom:10px}}
+
+/* Keep the generated certificate area completely hidden until a certificate is verified. */
+#certificateActions[hidden]{display:none!important}
+#certificatePreview[hidden]{display:none!important}
