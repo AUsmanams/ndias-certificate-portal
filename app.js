@@ -167,9 +167,6 @@ async function showCertificate(person, successMessage) {
   show("success", "Certificate Verified", successMessage);
   if (previewPlaceholder) previewPlaceholder.hidden = true;
   const canvas = await createCertificate(person);
-  preview.src = canvas.toDataURL("image/jpeg", 0.94);
-  preview.hidden = false;
-
   downloadPng.href = canvas.toDataURL("image/png");
   downloadPng.download = person.certificateNumber + ".png";
   downloadPng.hidden = false;
