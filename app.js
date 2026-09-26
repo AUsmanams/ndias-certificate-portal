@@ -247,7 +247,7 @@ async function startCertificateRequest(event) {
 
 async function verifyPaidCertificate(reference) {
   if (!certificateRequestsEnabled) {
-    show("error", "Certificate Payments Not Yet Live", "Paid certificate requests are temporarily disabled until Paystack Live Mode is activated.");
+    show("error", "Certificate Payments Not Yet Live", "Paid certificate requests are temporarily disabled until officially open.");
     return;
   }
   show("success", "Checking Payment…", "Please wait while we securely verify your " + formatNaira(certificatePrice) + " payment.");
