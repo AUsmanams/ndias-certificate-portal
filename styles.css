@@ -26,6 +26,13 @@ button:disabled{opacity:.65;cursor:wait}
 .error{background:#fff4f3;border:1px solid #f0c7c2}
 .status strong{display:block;font-size:18px;margin-bottom:6px}
 .certificate-actions{margin-top:24px}
+.certificate-preview-card{display:grid;grid-template-columns:1.45fr .9fr;align-items:center;gap:0;overflow:hidden;margin-top:24px;border:1px solid #d9e2dc;border-radius:18px;background:linear-gradient(135deg,#f7fbff,#fff);box-shadow:0 12px 34px rgba(20,45,80,.10)}
+.preview-art{padding:18px 10px 18px 18px;background:linear-gradient(145deg,#f1f6fb,#fff)}
+.preview-art img{width:100%;display:block;border-radius:10px;box-shadow:0 12px 24px rgba(20,45,80,.16)}
+.preview-copy{padding:30px 30px 30px 22px}
+.preview-kicker{font-size:11px;font-weight:800;letter-spacing:.06em;color:#b47b16;margin-bottom:12px}
+.preview-copy h3{margin:0;color:#0b2d63;font-size:30px;line-height:1.08}
+.preview-copy p{margin:18px 0 0;color:#5b6b7a;font-size:14px;line-height:1.65}
 .certificate-preview{width:100%;height:auto;border:1px solid #d9e2dc;border-radius:12px;display:block}
 .downloads{display:flex;gap:10px;margin-top:14px}
 .download{display:inline-flex;align-items:center;justify-content:center;padding:12px 16px;border-radius:10px;background:#08783d;color:#fff;text-decoration:none;font-weight:700;border:0;cursor:pointer}
@@ -49,7 +56,8 @@ button:disabled{opacity:.65;cursor:wait}
 .footer-copy strong{color:#12251a;font-size:13px}
 .footer-copy span{font-size:11px}
 .footer-copy small{font-size:10px;color:#7a867e}
-@media(max-width:700px){.certificate-preview-card{grid-template-columns:1fr}.preview-art{padding:12px}.preview-copy{padding:20px}.preview-copy h3{font-size:24px}.preview-copy p{font-size:13px}.card{padding:28px 20px;border-radius:18px}.official-header{grid-template-columns:58px 1fr 58px;gap:9px}.official-logo-box{width:58px;height:58px}.official-title h1{font-size:16px}.eyebrow{font-size:7px}.official-title span{font-size:9px}.card h2{font-size:25px}.input-row{flex-direction:column}.input-row button{height:50px}.downloads{flex-direction:column}.download{width:100%}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.site-footer{margin-bottom:10px}}
+@media(max-width:700px){.certificate-preview-card{grid-template-columns:1fr}.preview-art{padding:12px}.preview-copy{padding:20px}.preview-copy h3{font-size:24px}.preview-copy p{font-size:13px}
+.certificate-preview-card{grid-template-columns:1fr}.preview-art{padding:12px}.preview-copy{padding:20px}.preview-copy h3{font-size:24px}.preview-copy p{font-size:13px}.card{padding:28px 20px;border-radius:18px}.official-header{grid-template-columns:58px 1fr 58px;gap:9px}.official-logo-box{width:58px;height:58px}.official-title h1{font-size:16px}.eyebrow{font-size:7px}.official-title span{font-size:9px}.card h2{font-size:25px}.input-row{flex-direction:column}.input-row button{height:50px}.downloads{flex-direction:column}.download{width:100%}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.site-footer{margin-bottom:10px}}
 
 /* Keep the generated certificate area completely hidden until a certificate is verified. */
 #certificateActions[hidden]{display:none!important}
