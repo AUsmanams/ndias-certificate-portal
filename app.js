@@ -34,7 +34,7 @@ async function loadCertificatePrice() {
       if (!certificateRequestsEnabled) {
         toggle.hidden = false;
         toggle.disabled = true;
-        toggle.textContent = "Certificate Requests — Payment Not Yet Live";
+        toggle.textContent = "Certificate Requests — ₦" + certificatePrice.toLocaleString("en-NG");
         form.hidden = true;
         requestButton.disabled = true;
       } else {
@@ -196,7 +196,7 @@ async function verifyAndGenerate(id) {
 async function startCertificateRequest(event) {
   event.preventDefault();
   if (!certificateRequestsEnabled) {
-    show("error", "Certificate Requests Not Yet Available", "Payment will be enabled after NDIAS Paystack payments go live.", requestResult);
+    show("error", "Certificate Request Unavailable", "Please try again shortly.", requestResult);
     return;
   }
   requestButton.disabled = true;
@@ -241,7 +241,7 @@ async function startCertificateRequest(event) {
 
 async function verifyPaidCertificate(reference) {
   if (!certificateRequestsEnabled) {
-    show("error", "Certificate Payments Not Yet Live", "Paid certificate requests are temporarily disabled until officially open.");
+    show("error", "Certificate Payment Unavailable", "Please try again shortly.");
     return;
   }
   show("success", "Checking Payment…", "Please wait while we securely verify your " + formatNaira(certificatePrice) + " payment.");
