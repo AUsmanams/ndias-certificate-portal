@@ -15,6 +15,7 @@ const REGISTRY_URL = "./data/eligible.json";
 const MASTER_URL = "./assets/ndias-certificate-master.jpg";
 const VERIFY_BASE = "https://ausmanams.github.io/ndias-certificate-portal/";
 const PAYMENT_API = "https://ndias-payment-api.vercel.app";
+const CERTIFICATE_VERIFY_API = PAYMENT_API + "/api/verify-certificate";
 let registry = [];
 let certificatePrice = 500;
 let certificateRequestsEnabled = false;
@@ -183,17 +184,45 @@ async function showCertificate(person, successMessage) {
 
 async function verifyAndGenerate(id) {
   if (!registry.length) await loadRegistry();
+
+  // Existing eligible participants receive certificates without payment.
   const person = registry.find(p => cleanId(p.participantId) === id && p.eligible === true);
-  if (!person) {
-        downloadPng.hidden = true;
-    downloadPdf.hidden = true;
-    show("error", "Certificate Not Available", "No eligible certificate was found for this Participant ID.");
+  if (person) {
+    await showCertificate(
+      person,
+      "This Participant ID is eligible for an official NDIAS 2026 certificate."
+    );
     return;
   }
 
+  // Paid/manual certificates are stored in the payment database and can be
+  // verified by either the request ID or the certificate number.
+  const response = await fetch(
+    CERTIFICATE_VERIFY_API + "?identifier=" + encodeURIComponent(id),
+    { cache: "no-store" }
+  );
+  const data = await response.json();
+
+  if (!response.ok || !data.valid) {
+    downloadPng.hidden = true;
+    downloadPdf.hidden = true;
+    show("error", "Certificate Not Available", data.error || "No eligible or issued certificate was found for this ID.");
+    return;
+  }
+
+  const paidPerson = {
+    name: data.name,
+    participantId: data.participantId,
+    certificateNumber: data.certificateNumber,
+    eligible: true,
+    verificationUrl: VERIFY_BASE + "?id=" + encodeURIComponent(data.certificateNumber)
+  };
+
   await showCertificate(
-    person,
-    "This Participant ID is eligible for an official NDIAS 2026 certificate."
+    paidPerson,
+    data.paymentStatus === "manual_approved"
+      ? "This certificate was manually approved by the NDIAS administrator."
+      : "This paid certificate has been verified and is ready for download."
   );
 }
 
@@ -282,7 +311,7 @@ async function verifyPaidCertificate(reference) {
     participantId,
     certificateNumber: data.certificateNumber || ("NDIAS-CR-2026-" + shortRef),
     eligible: true,
-    verificationUrl: VERIFY_BASE + "?payment=" + encodeURIComponent(data.reference || reference)
+    verificationUrl: VERIFY_BASE + "?id=" + encodeURIComponent(data.certificateNumber || participantId)
   };
 
   await showCertificate(
