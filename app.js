@@ -3,6 +3,7 @@ const input = document.getElementById("participantId");
 const result = document.getElementById("result");
 const button = document.getElementById("checkBtn");
 const preview = document.getElementById("certificatePreview");
+const certificatePlaceholder = document.getElementById("certificatePlaceholder");
 const downloadPng = document.getElementById("downloadPng");
 const downloadPdf = document.getElementById("downloadPdf");
 
@@ -164,6 +165,7 @@ async function createCertificate(person) {
 
 async function showCertificate(person, successMessage) {
   show("success", "Certificate Verified", successMessage);
+  if (certificatePlaceholder) certificatePlaceholder.hidden = true;
   const canvas = await createCertificate(person);
   preview.src = canvas.toDataURL("image/jpeg", 0.94);
   preview.hidden = false;
