@@ -187,8 +187,7 @@ async function verifyAndGenerate(id) {
   if (!registry.length) await loadRegistry();
   const person = registry.find(p => cleanId(p.participantId) === id && p.eligible === true);
   if (!person) {
-    preview.hidden = true;
-    downloadPng.hidden = true;
+        downloadPng.hidden = true;
     downloadPdf.hidden = true;
     show("error", "Certificate Not Available", "No eligible certificate was found for this Participant ID.");
     return;
@@ -209,8 +208,7 @@ async function startCertificateRequest(event) {
   requestButton.disabled = true;
   requestButton.textContent = "Preparing payment…";
   requestResult.innerHTML = "";
-  preview.hidden = true;
-  downloadPng.hidden = true;
+    downloadPng.hidden = true;
   downloadPdf.hidden = true;
 
   const formData = new FormData(requestForm);
@@ -253,8 +251,7 @@ async function verifyPaidCertificate(reference) {
     return;
   }
   show("success", "Checking Payment…", "Please wait while we securely verify your " + formatNaira(certificatePrice) + " payment.");
-  preview.hidden = true;
-  downloadPng.hidden = true;
+    downloadPng.hidden = true;
   downloadPdf.hidden = true;
 
   const response = await fetch(
@@ -305,8 +302,7 @@ form.addEventListener("submit", async (event) => {
 
   button.disabled = true;
   button.textContent = "Checking…";
-  preview.hidden = true;
-  downloadPng.hidden = true;
+    downloadPng.hidden = true;
   downloadPdf.hidden = true;
 
   try {
