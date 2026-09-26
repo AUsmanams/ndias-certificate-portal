@@ -3,6 +3,7 @@ const input = document.getElementById("participantId");
 const result = document.getElementById("result");
 const button = document.getElementById("checkBtn");
 const preview = document.getElementById("certificatePreview");
+const certificateActions = document.getElementById("certificateActions");
 const certificatePlaceholder = document.getElementById("certificatePlaceholder");
 const downloadPng = document.getElementById("downloadPng");
 const downloadPdf = document.getElementById("downloadPdf");
