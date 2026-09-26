@@ -48,6 +48,11 @@ async function loadCertificatePrice() {
       document.getElementById("requestPriceButton").textContent = formatNaira(certificatePrice);
     }
   } catch (error) {
+    certificateRequestsEnabled = false;
+    requestToggle.disabled = true;
+    requestToggle.textContent = "Certificate Requests — Temporarily Unavailable";
+    requestForm.hidden = true;
+    requestButton.disabled = true;
     console.warn("Could not load certificate price configuration.", error);
   }
 }
@@ -324,9 +329,10 @@ requestToggle.addEventListener("click", () => {
 
 requestForm.addEventListener("submit", startCertificateRequest);
 
-loadCertificatePrice();
+(async () => {
+  await loadCertificatePrice();
 
-const params = new URLSearchParams(location.search);
+  const params = new URLSearchParams(location.search);
 const paymentReference = params.get("reference");
 const paidReference = params.get("payment");
 
@@ -341,6 +347,7 @@ if (paymentReference) {
     show("error", "Certificate Verification Failed", error.message || "We could not verify this paid certificate.");
   });
 } else if (params.get("id")) {
-  input.value = params.get("id");
-  form.requestSubmit();
-}
+    input.value = params.get("id");
+    form.requestSubmit();
+  }
+})();
