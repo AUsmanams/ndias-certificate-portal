@@ -8,18 +8,28 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+<div class="palace-watermark" aria-hidden="true"></div>
+
 <main class="page">
 <section class="card">
-<div class="brand">
-  <div class="brand-mark">N</div>
-  <div>
-    <div class="eyebrow">NAZAS DIGITAL INNOVATION & AI SUMMIT</div>
-    <h1>NDIAS 2026</h1>
+
+<header class="official-header">
+  <div class="official-logo-box">
+    <img src="assets/nazas-logo.jpeg" alt="National Association of Zazzau Students (NAZAS) logo">
   </div>
-</div>
+  <div class="official-title">
+    <div class="eyebrow">NATIONAL ASSOCIATION OF ZAZZAU STUDENTS</div>
+    <h1>NAZAS DIGITAL INNOVATION &amp; AI SUMMIT</h1>
+    <span>NDIAS 2026 • Official Certificate Portal</span>
+  </div>
+  <div class="official-logo-box ndias-logo-box">
+    <img src="assets/ndias-2026-logo.jpeg" alt="NDIAS 2026 logo">
+  </div>
+</header>
+
 <div class="divider"></div>
 
-<h2>Certificate Verification & Download</h2>
+<h2>Certificate Verification &amp; Download</h2>
 <p class="lead">Enter your Participant ID to verify and download your official NDIAS 2026 certificate.</p>
 
 <form id="verifyForm" autocomplete="off">
@@ -78,14 +88,25 @@
 
   <div id="requestResult" class="result" aria-live="polite"></div>
 
-  <button id="requestButton" class="pay-button" type="submit">Pay <span id="requestPriceButton">₦500</span> & Request Certificate</button>
+  <button id="requestButton" class="pay-button" type="submit">Pay <span id="requestPriceButton">₦500</span> &amp; Request Certificate</button>
   <p class="payment-note">Payment is processed securely by Paystack. Your card, bank, or transfer details are handled by Paystack and are not stored by this portal.</p>
 </form>
 
 <p class="note">Existing participants can verify using their Participant ID. Certificate requests are processed separately after payment verification.</p>
 </section>
-<footer>NAZAS • NDIAS 2026 • Official Certificate Verification System</footer>
+
+<footer class="site-footer">
+  <div class="footer-brand">
+    <img src="assets/auconnection.jpeg" alt="AUconnection logo">
+  </div>
+  <div class="footer-copy">
+    <strong>Developed by Abubakar Aliyu</strong>
+    <span>Digital Innovation &amp; Technology</span>
+    <small>Powered by AUconnection • NDIAS 2026</small>
+  </div>
+</footer>
 </main>
+
 <script src="assets/qrcode.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script src="app.js"></script>
