@@ -3,7 +3,6 @@ const input = document.getElementById("participantId");
 const result = document.getElementById("result");
 const button = document.getElementById("checkBtn");
 const preview = document.getElementById("certificatePreview");
-const certificatePlaceholder = document.getElementById("certificatePlaceholder");
 const downloadPng = document.getElementById("downloadPng");
 const downloadPdf = document.getElementById("downloadPdf");
 
@@ -165,7 +164,7 @@ async function createCertificate(person) {
 
 async function showCertificate(person, successMessage) {
   show("success", "Certificate Verified", successMessage);
-  certificatePlaceholder.hidden = true;
+  certificateActions.hidden = false;
   const canvas = await createCertificate(person);
   preview.src = canvas.toDataURL("image/jpeg", 0.94);
   preview.hidden = false;
@@ -207,6 +206,7 @@ async function startCertificateRequest(event) {
   requestButton.disabled = true;
   requestButton.textContent = "Preparing payment…";
   requestResult.innerHTML = "";
+  certificateActions.hidden = true;
   preview.hidden = true;
     downloadPng.hidden = true;
   downloadPdf.hidden = true;
@@ -251,7 +251,8 @@ async function verifyPaidCertificate(reference) {
     return;
   }
   show("success", "Checking Payment…", "Please wait while we securely verify your " + formatNaira(certificatePrice) + " payment.");
-    downloadPng.hidden = true;
+  certificateActions.hidden = true;
+  downloadPng.hidden = true;
   downloadPdf.hidden = true;
 
   const response = await fetch(
@@ -302,7 +303,8 @@ form.addEventListener("submit", async (event) => {
 
   button.disabled = true;
   button.textContent = "Checking…";
-    downloadPng.hidden = true;
+  certificateActions.hidden = true;
+  downloadPng.hidden = true;
   downloadPdf.hidden = true;
 
   try {
