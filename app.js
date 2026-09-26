@@ -16,6 +16,26 @@ const MASTER_URL = "./assets/ndias-certificate-master.jpg";
 const VERIFY_BASE = "https://ausmanams.github.io/ndias-certificate-portal/";
 const PAYMENT_API = "https://ndias-payment-api.vercel.app";
 let registry = [];
+let certificatePrice = 500;
+
+function formatNaira(amount) {
+  return "₦" + Number(amount || 0).toLocaleString("en-NG");
+}
+
+async function loadCertificatePrice() {
+  try {
+    const response = await fetch(PAYMENT_API + "/api/config", { cache: "no-store" });
+    const data = await response.json();
+    if (response.ok && data.ok && Number(data.amount) > 0) {
+      certificatePrice = Number(data.amount);
+      document.getElementById("requestPriceToggle").textContent = formatNaira(certificatePrice);
+      document.getElementById("requestPriceText").textContent = formatNaira(certificatePrice);
+      document.getElementById("requestPriceButton").textContent = formatNaira(certificatePrice);
+    }
+  } catch (error) {
+    console.warn("Could not load certificate price configuration.", error);
+  }
+}
 
 function cleanId(value) {
   return value.trim().toUpperCase().replace(/\s+/g, "");
@@ -193,12 +213,12 @@ async function startCertificateRequest(event) {
     console.error(error);
     show("error", "Payment Could Not Start", error.message || "Please try again.", requestResult);
     requestButton.disabled = false;
-    requestButton.textContent = "Pay ₦500 & Request Certificate";
+    requestButton.textContent = "Pay " + formatNaira(certificatePrice) + " & Request Certificate";
   }
 }
 
 async function verifyPaidCertificate(reference) {
-  show("success", "Checking Payment…", "Please wait while we securely verify your ₦500 payment.");
+  show("success", "Checking Payment…", "Please wait while we securely verify your " + formatNaira(certificatePrice) + " payment.");
   preview.hidden = true;
   downloadPng.hidden = true;
   downloadPdf.hidden = true;
@@ -224,11 +244,11 @@ async function verifyPaidCertificate(reference) {
   }
 
   const shortRef = String(data.reference || reference).slice(-8).toUpperCase();
-  const participantId = "NDIAS/CR/26/" + shortRef;
+  const participantId = metadata.request_id || ("NDIAS/CR/26/" + shortRef);
   const person = {
     name: metadata.name,
     participantId,
-    certificateNumber: "NDIAS-CR-2026-" + shortRef,
+    certificateNumber: data.certificateNumber || ("NDIAS-CR-2026-" + shortRef),
     eligible: true,
     verificationUrl: VERIFY_BASE + "?payment=" + encodeURIComponent(data.reference || reference)
   };
@@ -275,6 +295,8 @@ requestToggle.addEventListener("click", () => {
 });
 
 requestForm.addEventListener("submit", startCertificateRequest);
+
+loadCertificatePrice();
 
 const params = new URLSearchParams(location.search);
 const paymentReference = params.get("reference");
