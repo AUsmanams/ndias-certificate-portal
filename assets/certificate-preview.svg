@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="520" viewBox="0 0 1080 520">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f7fbff"/>
+      <stop offset="1" stop-color="#ffffff"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#12251a" flood-opacity=".18"/>
+    </filter>
+    <clipPath id="certClip"><rect x="38" y="62" width="590" height="394" rx="8"/></clipPath>
+  </defs>
+
+  <rect width="1080" height="520" rx="22" fill="url(#bg)"/>
+  <rect x="1" y="1" width="1078" height="518" rx="22" fill="none" stroke="#dbe7ef" stroke-width="2"/>
+
+  <rect x="18" y="28" width="640" height="464" rx="16" fill="#edf5fb"/>
+  <rect x="30" y="40" width="616" height="440" rx="14" fill="#fff" filter="url(#shadow)"/>
+  <g clip-path="url(#certClip)">
+    <image href="https://ausmanams.github.io/ndias-certificate-portal/assets/ndias-certificate-master.jpg"
+           x="38" y="62" width="590" height="394" preserveAspectRatio="xMidYMid slice"/>
+  </g>
+
+  <g transform="translate(700 86)">
+    <circle cx="24" cy="24" r="23" fill="#fff7df" stroke="#c79a32" stroke-width="2"/>
+    <path d="M24 10l4.2 8.5 9.4 1.4-6.8 6.6 1.6 9.3-8.4-4.4-8.4 4.4 1.6-9.3-6.8-6.6 9.4-1.4z" fill="#c79a32"/>
+    <text x="62" y="31" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#a87517" letter-spacing=".4">OFFICIAL CERTIFICATE</text>
+
+    <text x="0" y="100" font-family="Arial, sans-serif" font-size="42" font-weight="800" fill="#0b2d63">NDIAS 2026</text>
+    <text x="0" y="148" font-family="Arial, sans-serif" font-size="36" font-weight="700" fill="#0b2d63">Certificate Preview</text>
+
+    <line x1="0" y1="178" x2="310" y2="178" stroke="#c79a32" stroke-width="2"/>
+
+    <text x="0" y="215" font-family="Arial, sans-serif" font-size="19" fill="#536579">
+      <tspan x="0" dy="0">This is a sample preview of the official</tspan>
+      <tspan x="0" dy="31">NDIAS 2026 certificate.</tspan>
+      <tspan x="0" dy="31">Your certificate will be generated with</tspan>
+      <tspan x="0" dy="31">your correct name, Participant ID and</tspan>
+      <tspan x="0" dy="31">QR code after successful payment.</tspan>
+    </text>
+  </g>
+
+  <text x="700" y="455" font-family="Arial, sans-serif" font-size="13" fill="#7b8793">Official NDIAS 2026 certificate preview</text>
+</svg>
