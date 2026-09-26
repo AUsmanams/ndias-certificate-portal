@@ -70,70 +70,74 @@ function loadImage(src) {
   });
 }
 
-function fitNameFont(ctx, name, maxWidth) {
-  let size = 76;
-  while (size > 42) {
+function fitNameFont(ctx, name, maxWidth, startSize = 102) {
+  let size = startSize;
+  while (size > 54) {
     ctx.font = `italic ${size}px "Brush Script MT", "Segoe Script", "Lucida Handwriting", cursive`;
     if (ctx.measureText(name).width <= maxWidth) return;
     size -= 2;
   }
-  ctx.font = 'italic 42px "Brush Script MT", "Segoe Script", "Lucida Handwriting", cursive';
+  ctx.font = 'italic 54px "Brush Script MT", "Segoe Script", "Lucida Handwriting", cursive';
 }
 
 async function createCertificate(person) {
   const img = await loadImage(MASTER_URL);
+  const width = img.naturalWidth || 2048;
+  const height = img.naturalHeight || 1365;
   const canvas = document.createElement("canvas");
-  canvas.width = 1536;
-  canvas.height = 1024;
+  canvas.width = width;
+  canvas.height = height;
   const ctx = canvas.getContext("2d");
-  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  ctx.drawImage(img, 0, 0, width, height);
 
-  // Clear the sample recipient name while preserving the official gold rule.
+  // New official master: clear only the sample participant name.
   ctx.fillStyle = "rgba(250,250,248,0.97)";
-  ctx.fillRect(345, 548, 855, 82);
+  ctx.fillRect(460, 731, 1140, 125);
+
+  // Restore the official gold rule beneath the participant name.
   ctx.strokeStyle = "#c79a32";
-  ctx.lineWidth = 2;
+  ctx.lineWidth = 3;
   ctx.beginPath();
-  ctx.moveTo(350, 638);
-  ctx.lineTo(1198, 638);
+  ctx.moveTo(470, 862);
+  ctx.lineTo(1580, 862);
   ctx.stroke();
 
-  fitNameFont(ctx, person.name, 830);
+  fitNameFont(ctx, person.name, 1080);
   ctx.fillStyle = "#0b2d63";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText(person.name, 770, 592);
+  ctx.fillText(person.name, 1024, 797);
 
-  // Replace the sample QR/ID block.
+  // Replace the sample QR/ID block in the new official master.
   ctx.fillStyle = "#ffffff";
-  ctx.fillRect(58, 742, 150, 188);
+  ctx.fillRect(72, 982, 205, 250);
   ctx.strokeStyle = "#c79a32";
-  ctx.lineWidth = 2;
-  ctx.strokeRect(64, 748, 138, 132);
+  ctx.lineWidth = 3;
+  ctx.strokeRect(84, 995, 178, 178);
 
   const qr = qrcode(0, "M");
   qr.addData(person.verificationUrl || (VERIFY_BASE + "?id=" + encodeURIComponent(person.participantId)));
   qr.make();
   const modules = qr.getModuleCount();
-  const qrSize = 120;
+  const qrSize = 150;
   const cell = qrSize / modules;
   ctx.fillStyle = "#ffffff";
-  ctx.fillRect(73, 755, qrSize, qrSize);
+  ctx.fillRect(98, 1009, qrSize, qrSize);
   ctx.fillStyle = "#000000";
   for (let row = 0; row < modules; row++) {
     for (let col = 0; col < modules; col++) {
       if (qr.isDark(row, col)) {
-        ctx.fillRect(73 + col * cell, 755 + row * cell, Math.ceil(cell), Math.ceil(cell));
+        ctx.fillRect(98 + col * cell, 1009 + row * cell, Math.ceil(cell), Math.ceil(cell));
       }
     }
   }
 
   ctx.fillStyle = "#12251a";
-  ctx.font = "700 12px Arial, sans-serif";
+  ctx.font = "700 17px Arial, sans-serif";
   ctx.textAlign = "center";
-  ctx.fillText(person.participantId, 133, 893);
-  ctx.font = "700 11px Arial, sans-serif";
-  ctx.fillText("Verify Certificate", 133, 914);
+  ctx.fillText(person.participantId, 173, 1192);
+  ctx.font = "700 15px Arial, sans-serif";
+  ctx.fillText("Verify Certificate", 173, 1218);
 
   return canvas;
 }
@@ -150,8 +154,8 @@ async function showCertificate(person, successMessage) {
 
   downloadPdf.onclick = () => {
     const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({ orientation: "landscape", unit: "px", format: [1536, 1024] });
-    pdf.addImage(canvas.toDataURL("image/jpeg", 0.95), "JPEG", 0, 0, 1536, 1024);
+    const pdf = new jsPDF({ orientation: "landscape", unit: "px", format: [canvas.width, canvas.height] });
+    pdf.addImage(canvas.toDataURL("image/jpeg", 0.95), "JPEG", 0, 0, canvas.width, canvas.height);
     pdf.save(person.certificateNumber + ".pdf");
   };
   downloadPdf.hidden = false;
