@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="NDIAS 2026 Certificate Verification and Download Portal">
-<title>NDIAS 2026 | Certificate Verification</title>
+<meta name="description" content="NDIAS 2026 Certificate Verification and Certificate Request Portal">
+<title>NDIAS 2026 | Certificate Portal</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -18,8 +18,10 @@
   </div>
 </div>
 <div class="divider"></div>
+
 <h2>Certificate Verification & Download</h2>
 <p class="lead">Enter your Participant ID to verify and download your official NDIAS 2026 certificate.</p>
+
 <form id="verifyForm" autocomplete="off">
 <label for="participantId">Participant ID</label>
 <div class="input-row">
@@ -27,7 +29,9 @@
 <button type="submit" id="checkBtn">Check Certificate</button>
 </div>
 </form>
+
 <div id="result" class="result" aria-live="polite"></div>
+
 <div class="certificate-actions">
 <img id="certificatePreview" class="certificate-preview" alt="Generated NDIAS 2026 certificate preview" hidden>
 <div class="downloads">
@@ -35,7 +39,50 @@
 <button id="downloadPdf" class="download secondary" type="button" hidden>Download PDF</button>
 </div>
 </div>
-<p class="note">Only participants who meet the official NDIAS eligibility requirements can generate a certificate.</p>
+
+<div class="request-divider"></div>
+<button id="requestToggle" class="request-toggle" type="button">Request a Certificate — ₦500</button>
+
+<form id="requestForm" class="request-form" hidden>
+  <div class="request-heading">
+    <h3>Certificate Request</h3>
+    <p>Complete the form below. After submission, you will be redirected to Paystack to make the ₦500 payment.</p>
+  </div>
+
+  <div class="form-grid">
+    <div class="field full">
+      <label for="requestName">Full Name *</label>
+      <input id="requestName" name="name" required placeholder="Enter your full name">
+    </div>
+
+    <div class="field">
+      <label for="requestEmail">Email Address *</label>
+      <input id="requestEmail" name="email" type="email" required placeholder="you@example.com">
+    </div>
+
+    <div class="field">
+      <label for="requestPhone">Phone / WhatsApp</label>
+      <input id="requestPhone" name="phone" type="tel" placeholder="08012345678">
+    </div>
+
+    <div class="field">
+      <label for="requestInstitution">Institution</label>
+      <input id="requestInstitution" name="institution" placeholder="Name of institution">
+    </div>
+
+    <div class="field">
+      <label for="requestLga">LGA</label>
+      <input id="requestLga" name="lga" placeholder="Local Government Area">
+    </div>
+  </div>
+
+  <div id="requestResult" class="result" aria-live="polite"></div>
+
+  <button id="requestButton" class="pay-button" type="submit">Pay ₦500 & Request Certificate</button>
+  <p class="payment-note">Payment is processed securely by Paystack. Your card, bank, or transfer details are handled by Paystack and are not stored by this portal.</p>
+</form>
+
+<p class="note">Existing participants can verify using their Participant ID. Certificate requests are processed separately after payment verification.</p>
 </section>
 <footer>NAZAS • NDIAS 2026 • Official Certificate Verification System</footer>
 </main>
