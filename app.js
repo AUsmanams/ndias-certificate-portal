@@ -288,8 +288,8 @@ form.addEventListener("submit", async (event) => {
 
 requestToggle.addEventListener("click", () => {
   requestForm.hidden = !requestForm.hidden;
-  requestToggle.textContent = requestForm.hidden
-    ? "Request a Certificate — ₦500"
+  requestToggle.innerHTML = requestForm.hidden
+    ? "Request a Certificate — <span id=\"requestPriceToggle\">" + formatNaira(certificatePrice) + "</span>"
     : "Close Certificate Request";
   if (!requestForm.hidden) requestForm.querySelector("input")?.focus();
 });
