@@ -206,8 +206,7 @@ async function startCertificateRequest(event) {
   requestButton.textContent = "Preparing payment…";
   requestResult.innerHTML = "";
   preview.hidden = true;
-  certificatePlaceholder.hidden = true;
-  downloadPng.hidden = true;
+    downloadPng.hidden = true;
   downloadPdf.hidden = true;
 
   const formData = new FormData(requestForm);
@@ -330,7 +329,10 @@ requestForm.addEventListener("submit", startCertificateRequest);
   await loadCertificatePrice();
 
   const params = new URLSearchParams(location.search);
-const paymentReference = params.get("reference");
+const paymentReference =
+  params.get("paymentReference") ||
+  params.get("reference") ||
+  params.get("payment");
 const paidReference = params.get("payment");
 
 if (paymentReference) {
