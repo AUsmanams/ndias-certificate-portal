@@ -164,6 +164,8 @@ async function createCertificate(person) {
 }
 
 async function showCertificate(person, successMessage) {
+  const placeholder = document.getElementById("certificatePreviewPlaceholder");
+  if (placeholder) placeholder.hidden = true;
   show("success", "Certificate Verified", successMessage);
   if (certificatePlaceholder) certificatePlaceholder.hidden = true;
   const canvas = await createCertificate(person);
