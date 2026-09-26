@@ -2,8 +2,6 @@ const form = document.getElementById("verifyForm");
 const input = document.getElementById("participantId");
 const result = document.getElementById("result");
 const button = document.getElementById("checkBtn");
-const preview = document.getElementById("certificatePreview");
-const previewPlaceholder = document.getElementById("certificatePreviewPlaceholder");
 const downloadPng = document.getElementById("downloadPng");
 const downloadPdf = document.getElementById("downloadPdf");
 
@@ -165,7 +163,6 @@ async function createCertificate(person) {
 
 async function showCertificate(person, successMessage) {
   show("success", "Certificate Verified", successMessage);
-  if (previewPlaceholder) previewPlaceholder.hidden = true;
   const canvas = await createCertificate(person);
   downloadPng.href = canvas.toDataURL("image/png");
   downloadPng.download = person.certificateNumber + ".png";
