@@ -182,12 +182,34 @@ async function showCertificate(person, successMessage) {
   };
   downloadPdf.hidden = false;
   downloadReceipt.hidden = person.paymentStatus !== "paid";
-  downloadReceipt.onclick = () => {
+  downloadReceipt.onclick = async () => {
     const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF();
-    pdf.setFontSize(18);
-    pdf.text("NDIAS 2026 CERTIFICATE PAYMENT RECEIPT", 20, 25);
+    const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+
+    // Official NDIAS logo on the receipt.
+    try {
+      const logo = await loadImage("assets/NDIAS%202026%20logo.jpeg");
+      const logoCanvas = document.createElement("canvas");
+      logoCanvas.width = logo.naturalWidth || 500;
+      logoCanvas.height = logo.naturalHeight || 500;
+      const logoCtx = logoCanvas.getContext("2d");
+      logoCtx.drawImage(logo, 0, 0, logoCanvas.width, logoCanvas.height);
+      const logoData = logoCanvas.toDataURL("image/jpeg", 0.92);
+      pdf.addImage(logoData, "JPEG", 15, 10, 32, 24);
+    } catch (logoError) {
+      console.warn("Could not load NDIAS logo for receipt.", logoError);
+    }
+
+    pdf.setFontSize(16);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("NDIAS 2026", 52, 18);
     pdf.setFontSize(11);
+    pdf.setFont("helvetica", "normal");
+    pdf.text("CERTIFICATE PAYMENT RECEIPT", 52, 25);
+
+    pdf.setDrawColor(199, 154, 50);
+    pdf.line(15, 38, 195, 38);
+
     const lines = [
       ["Name", person.name],
       ["Request ID", person.participantId],
@@ -198,13 +220,22 @@ async function showCertificate(person, successMessage) {
       ["Payment Date", person.paidAt ? new Date(person.paidAt).toLocaleString() : new Date().toLocaleString()],
       ["Institution", person.institution || ""]
     ];
-    let y = 42;
+
+    let y = 52;
+    pdf.setFontSize(11);
     for (const [label, value] of lines) {
+      pdf.setFont("helvetica", "bold");
       pdf.text(label + ":", 20, y);
+      pdf.setFont("helvetica", "normal");
       pdf.text(String(value || "—"), 65, y);
-      y += 10;
+      y += 11;
     }
-    pdf.text("NDIAS 2026 • Official Certificate Portal", 20, y + 8);
+
+    pdf.line(15, y + 2, 195, y + 2);
+    pdf.setFontSize(9);
+    pdf.text("NDIAS 2026 • Official Certificate Portal", 20, y + 12);
+    pdf.text("Payment processed securely by Monnify.", 20, y + 18);
+
     pdf.save((person.certificateNumber || "NDIAS-payment") + "-receipt.pdf");
   };
 }
