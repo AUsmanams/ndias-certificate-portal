@@ -30,12 +30,12 @@
 <div class="divider"></div>
 
 <h2>Certificate Verification &amp; Download</h2>
-<p class="lead">Enter your Participant ID to verify and download your official NDIAS 2026 certificate.</p>
+<p class="lead">Enter your Participant ID or Certificate Number to verify and download your official NDIAS 2026 certificate.</p>
 
 <form id="verifyForm" autocomplete="off">
 <label for="participantId">Participant ID</label>
 <div class="input-row">
-<input id="participantId" name="participantId" placeholder="NDIAS/1.0/26/001" spellcheck="false" required>
+<input id="participantId" name="participantId" placeholder="NDIAS/1.0/26/001 or NDIAS-CR-2026-0002" spellcheck="false" required>
 <button type="submit" id="checkBtn">Check Certificate</button>
 </div>
 </form>
@@ -47,6 +47,7 @@
 <div class="downloads">
 <a id="downloadPng" class="download" hidden>Download PNG</a>
 <button id="downloadPdf" class="download secondary" type="button" hidden>Download PDF</button>
+<button id="downloadReceipt" class="download secondary" type="button" hidden>Download Payment Receipt</button>
 </div>
 </div>
 
@@ -92,7 +93,12 @@
   <p class="payment-note">Payment is processed securely by Monnify. Your card, bank, or transfer details are handled by Monnify and are not stored by this portal.</p>
 </form>
 
-<p class="note">Existing participants can verify using their Participant ID. Certificate requests are processed separately after payment verification.</p>
+<div class="recovery-box">
+  <strong>Paid but didn't receive your certificate?</strong>
+  <span>Enter your Request ID or Certificate Number above and click <b>Check Certificate</b>. You do not need to pay again.</span>
+</div>
+
+<p class="note">Existing participants can verify using their Participant ID. Paid certificate requests are stored separately and can be recovered even if the payment page or network connection was interrupted.</p>
 </section>
 
 <footer class="site-footer">
