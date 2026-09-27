@@ -5,6 +5,7 @@ const button = document.getElementById("checkBtn");
 const preview = document.getElementById("certificatePreview");
 const downloadPng = document.getElementById("downloadPng");
 const downloadPdf = document.getElementById("downloadPdf");
+const downloadReceipt = document.getElementById("downloadReceipt");
 
 const requestToggle = document.getElementById("requestToggle");
 const requestForm = document.getElementById("requestForm");
@@ -180,6 +181,32 @@ async function showCertificate(person, successMessage) {
     pdf.save(person.certificateNumber + ".pdf");
   };
   downloadPdf.hidden = false;
+  downloadReceipt.hidden = person.paymentStatus !== "paid";
+  downloadReceipt.onclick = () => {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF();
+    pdf.setFontSize(18);
+    pdf.text("NDIAS 2026 CERTIFICATE PAYMENT RECEIPT", 20, 25);
+    pdf.setFontSize(11);
+    const lines = [
+      ["Name", person.name],
+      ["Request ID", person.participantId],
+      ["Certificate Number", person.certificateNumber],
+      ["Amount", formatNaira(person.amount || certificatePrice)],
+      ["Payment Status", "PAID"],
+      ["Payment Reference", person.paymentReference || "Verified payment"],
+      ["Payment Date", person.paidAt ? new Date(person.paidAt).toLocaleString() : new Date().toLocaleString()],
+      ["Institution", person.institution || ""]
+    ];
+    let y = 42;
+    for (const [label, value] of lines) {
+      pdf.text(label + ":", 20, y);
+      pdf.text(String(value || "—"), 65, y);
+      y += 10;
+    }
+    pdf.text("NDIAS 2026 • Official Certificate Portal", 20, y + 8);
+    pdf.save((person.certificateNumber || "NDIAS-payment") + "-receipt.pdf");
+  };
 }
 
 async function verifyAndGenerate(id) {
@@ -215,6 +242,11 @@ async function verifyAndGenerate(id) {
     participantId: data.participantId,
     certificateNumber: data.certificateNumber,
     eligible: true,
+    paymentStatus: data.paymentStatus,
+    amount: data.amount,
+    paymentReference: data.reference,
+    paidAt: data.paidAt || null,
+    institution: data.institution || "",
     verificationUrl: VERIFY_BASE + "?id=" + encodeURIComponent(data.certificateNumber)
   };
 
@@ -311,6 +343,11 @@ async function verifyPaidCertificate(reference) {
     participantId,
     certificateNumber: data.certificateNumber || ("NDIAS-CR-2026-" + shortRef),
     eligible: true,
+    paymentStatus: "paid",
+    amount: data.amount || certificatePrice,
+    paymentReference: data.reference || reference,
+    paidAt: data.paidAt || null,
+    institution: metadata.institution || "",
     verificationUrl: VERIFY_BASE + "?id=" + encodeURIComponent(data.certificateNumber || participantId)
   };
 
