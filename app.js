@@ -255,16 +255,31 @@ async function verifyAndGenerate(id) {
 
   // Paid/manual certificates are stored in the payment database and can be
   // verified by either the request ID or the certificate number.
-  const response = await fetch(
-    CERTIFICATE_VERIFY_API + "?identifier=" + encodeURIComponent(id),
-    { cache: "no-store" }
-  );
-  const data = await response.json();
+  // If the participant has just paid, give the server a few quick chances to
+  // reconcile the payment before declaring that the certificate is unavailable.
+  let response;
+  let data = {};
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    response = await fetch(
+      CERTIFICATE_VERIFY_API + "?identifier=" + encodeURIComponent(id) + "&_=" + Date.now(),
+      { cache: "no-store" }
+    );
+    data = await response.json().catch(() => ({}));
+
+    if (response.ok && data.valid) break;
+    if (!data.pending || attempt === 3) break;
+    show("success", "Payment Still Processing", "Your Request ID " + id + " has been found. We are confirming the payment. Please wait… (" + attempt + "/3)");
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  }
 
   if (!response.ok || !data.valid) {
     downloadPng.hidden = true;
     downloadPdf.hidden = true;
-    show("error", "Certificate Not Available", data.error || "No eligible or issued certificate was found for this ID.");
+    show(
+      data.pending ? "success" : "error",
+      data.pending ? "Payment Still Processing" : "Certificate Not Available",
+      data.error || "No eligible or issued certificate was found for this ID."
+    );
     return;
   }
 
@@ -358,8 +373,8 @@ async function verifyPaidCertificate(reference) {
     return;
   }
 
-  const maxAttempts = 15;
-  const retryDelay = 2000;
+  const maxAttempts = 8;
+  const retryDelay = 1000;
   let lastMessage = "We are confirming your payment with Monnify.";
 
   certificateActions.hidden = true;
