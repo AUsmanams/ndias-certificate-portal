@@ -342,55 +342,100 @@ async function verifyPaidCertificate(reference) {
     show("error", "Certificate Payment Unavailable", "Please try again shortly.");
     return;
   }
-  show("success", "Checking Payment…", "Please wait while we securely verify your " + formatNaira(certificatePrice) + " payment.");
+
+  const maxAttempts = 15;
+  const retryDelay = 2000;
+  let lastMessage = "We are confirming your payment with Monnify.";
+
   certificateActions.hidden = true;
   downloadPng.hidden = true;
   downloadPdf.hidden = true;
+  downloadReceipt.hidden = true;
 
-  const response = await fetch(
-    PAYMENT_API + "/api/verify-payment?reference=" + encodeURIComponent(reference),
-    { cache: "no-store" }
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      show(
+        "success",
+        "Payment Received — Confirming Certificate",
+        attempt === 1
+          ? "Your payment has been submitted successfully. Please stay on this page while we securely confirm the ₦" + certificatePrice + " payment and prepare your certificate."
+          : "Payment confirmation is still in progress. Please wait… (" + attempt + "/" + maxAttempts + ")"
+      );
+
+      const response = await fetch(
+        PAYMENT_API + "/api/verify-payment?reference=" + encodeURIComponent(reference) + "&_=" + Date.now(),
+        { cache: "no-store" }
+      );
+      const data = await response.json().catch(() => ({}));
+
+      if (response.ok && data.paid) {
+        const metadata = data.metadata || {};
+        const email = data.customer?.email || "";
+
+        if (!metadata.name || !metadata.email || !email) {
+          lastMessage = "Payment was confirmed, but the certificate details are still being prepared.";
+        } else if (metadata.email.toLowerCase() !== email.toLowerCase()) {
+          throw new Error("Payment details could not be matched to the certificate request.");
+        } else {
+          const shortRef = String(data.reference || reference).slice(-8).toUpperCase();
+          const participantId = metadata.request_id || ("NDIAS/CR/26/" + shortRef);
+          const person = {
+            name: metadata.name,
+            participantId,
+            certificateNumber: data.certificateNumber || ("NDIAS-CR-2026-" + shortRef),
+            eligible: true,
+            paymentStatus: "paid",
+            amount: data.amount || certificatePrice,
+            paymentReference: data.reference || reference,
+            paidAt: data.paidAt || null,
+            institution: metadata.institution || "",
+            verificationUrl: VERIFY_BASE + "?id=" + encodeURIComponent(data.certificateNumber || participantId)
+          };
+
+          await showCertificate(
+            person,
+            "Payment verified successfully. Your NDIAS 2026 certificate has been generated and is ready to download."
+          );
+
+          requestToggle.hidden = true;
+          requestForm.hidden = true;
+          requestResult.innerHTML = "";
+          history.replaceState({}, document.title, VERIFY_BASE + "?certificate=" + encodeURIComponent(data.certificateNumber || participantId));
+          return;
+        }
+      } else {
+        const status = String(data.status || "").toUpperCase();
+        lastMessage = data.error || "Your payment is being confirmed.";
+        if (status === "FAILED" || status === "REVERSED" || status === "EXPIRED") {
+          show(
+            "error",
+            "Payment Not Completed",
+            "Monnify reports this payment as " + status.toLowerCase() + ". If money was debited from your account, please do not pay again; contact NDIAS support with your payment reference: " + reference
+          );
+          return;
+        }
+      }
+    } catch (error) {
+      console.warn("Payment confirmation attempt failed:", error);
+      lastMessage = error.message || lastMessage;
+    }
+
+    if (attempt < maxAttempts) {
+      await new Promise(resolve => setTimeout(resolve, retryDelay));
+    }
+  }
+
+  // Never label a potentially successful payment as invalid just because the
+  // browser/server took longer than expected. Give the participant a recovery
+  // path and keep the reference visible.
+  show(
+    "success",
+    "Payment Confirmation Taking Longer",
+    "We have not received the final confirmation yet. Please do not pay again. Your payment reference is " + reference + ". Keep this page open and use the Check Certificate box above later with your Request ID or certificate number. If your account was debited, NDIAS can reconcile the payment from this reference."
   );
-  const data = await response.json();
-
-  if (!response.ok || !data.paid) {
-    throw new Error(data.error || "Payment could not be verified.");
-  }
-
-  const metadata = data.metadata || {};
-  const email = data.customer?.email || "";
-  if (!metadata.name || !metadata.email || !email) {
-    throw new Error("The verified payment does not contain the required certificate details.");
-  }
-
-  if (metadata.email.toLowerCase() !== email.toLowerCase()) {
-    throw new Error("Payment details could not be matched to the certificate request.");
-  }
-
-  const shortRef = String(data.reference || reference).slice(-8).toUpperCase();
-  const participantId = metadata.request_id || ("NDIAS/CR/26/" + shortRef);
-  const person = {
-    name: metadata.name,
-    participantId,
-    certificateNumber: data.certificateNumber || ("NDIAS-CR-2026-" + shortRef),
-    eligible: true,
-    paymentStatus: "paid",
-    amount: data.amount || certificatePrice,
-    paymentReference: data.reference || reference,
-    paidAt: data.paidAt || null,
-    institution: metadata.institution || "",
-    verificationUrl: VERIFY_BASE + "?id=" + encodeURIComponent(data.certificateNumber || participantId)
-  };
-
-  await showCertificate(
-    person,
-    "Payment verified successfully. This certificate request has been approved."
-  );
-
-  requestToggle.hidden = true;
+  requestResult.innerHTML = "<div class='status success'><strong>Payment reference saved</strong><div>" + reference + "</div><div style='margin-top:6px'>" + lastMessage + "</div></div>";
+  requestToggle.hidden = false;
   requestForm.hidden = true;
-  requestResult.innerHTML = "";
-  history.replaceState({}, document.title, VERIFY_BASE + "?payment=" + encodeURIComponent(data.reference || reference));
 }
 
 form.addEventListener("submit", async (event) => {
@@ -434,17 +479,11 @@ const paymentReference =
   params.get("paymentReference") ||
   params.get("reference") ||
   params.get("payment");
-const paidReference = params.get("payment");
 
 if (paymentReference) {
   verifyPaidCertificate(paymentReference).catch(error => {
     console.error(error);
-    show("error", "Payment Verification Failed", error.message || "We could not verify the payment. Please contact NDIAS support.");
-  });
-} else if (paidReference) {
-  verifyPaidCertificate(paidReference).catch(error => {
-    console.error(error);
-    show("error", "Certificate Verification Failed", error.message || "We could not verify this paid certificate.");
+    show("error", "Payment Confirmation Problem", "Your payment may still be processing. Please do not pay again. Keep your payment reference and contact NDIAS support if confirmation does not complete.");
   });
 } else if (params.get("id")) {
     input.value = params.get("id");
