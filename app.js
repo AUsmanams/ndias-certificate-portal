@@ -328,6 +328,17 @@ async function startCertificateRequest(event) {
       throw new Error(data.error || data.details || "Unable to start payment.");
     }
 
+    // Save the Request ID before leaving for Monnify. This guarantees that the
+    // participant can recover the certificate from the dashboard even if the
+    // payment confirmation is delayed or the browser loses the callback.
+    if (data.requestId) {
+      input.value = data.requestId;
+      localStorage.setItem("ndiasLastRequestId", data.requestId);
+    }
+    if (data.reference) {
+      localStorage.setItem("ndiasLastPaymentReference", data.reference);
+    }
+
     window.location.href = data.authorization_url;
   } catch (error) {
     console.error(error);
