@@ -338,6 +338,10 @@ async function startCertificateRequest(event) {
 }
 
 async function verifyPaidCertificate(reference) {
+  // Keep the actual Monnify reference if an older callback contains a second
+  // query string after the reference.
+  reference = String(reference || "").split("?")[0].trim();
+
   if (!certificateRequestsEnabled) {
     show("error", "Certificate Payment Unavailable", "Please try again shortly.");
     return;
@@ -367,6 +371,18 @@ async function verifyPaidCertificate(reference) {
         { cache: "no-store" }
       );
       const data = await response.json().catch(() => ({}));
+
+      // The backend knows the Request ID even while Monnify is still
+      // processing. Put it in the dashboard immediately so the participant
+      // always has a self-service recovery ID.
+      const resolvedRequestId = data.requestId || data.metadata?.request_id || "";
+      if (resolvedRequestId) {
+        input.value = resolvedRequestId;
+        localStorage.setItem("ndiasLastRequestId", resolvedRequestId);
+      }
+      if (data.reference || reference) {
+        localStorage.setItem("ndiasLastPaymentReference", data.reference || reference);
+      }
 
       if (response.ok && data.paid) {
         const metadata = data.metadata || {};
@@ -428,10 +444,14 @@ async function verifyPaidCertificate(reference) {
   // Never label a potentially successful payment as invalid just because the
   // browser/server took longer than expected. Give the participant a recovery
   // path and keep the reference visible.
+  const savedRequestId = input.value.trim() || localStorage.getItem("ndiasLastRequestId") || "";
+
   show(
     "success",
     "Payment Confirmation Taking Longer",
-    "We have not received the final confirmation yet. Please do not pay again. Your payment reference is " + reference + ". Keep this page open and use the Check Certificate box above later with your Request ID or certificate number. If your account was debited, NDIAS can reconcile the payment from this reference."
+    savedRequestId
+      ? "Your payment is being confirmed. Your Request ID is " + savedRequestId + ". It has been placed in the Participant ID box above. Please do not pay again. When confirmation is complete, tap Check Certificate to generate your certificate."
+      : "Your payment is being confirmed. Please do not pay again. Your payment reference is " + reference + ". Keep this page open and try Check Certificate again when confirmation is complete."
   );
   requestResult.innerHTML = "<div class='status success'><strong>Payment reference saved</strong><div>" + reference + "</div><div style='margin-top:6px'>" + lastMessage + "</div></div>";
   requestToggle.hidden = false;
@@ -475,12 +495,23 @@ requestForm.addEventListener("submit", startCertificateRequest);
   await loadCertificatePrice();
 
   const params = new URLSearchParams(location.search);
-const paymentReference =
-  params.get("paymentReference") ||
-  params.get("reference") ||
-  params.get("payment");
+  const paymentReference = (
+    params.get("paymentReference") ||
+    params.get("reference") ||
+    params.get("payment") ||
+    ""
+  ).split("?")[0].trim();
 
-if (paymentReference) {
+  const returnedRequestId = params.get("requestId") || "";
+  if (returnedRequestId) {
+    input.value = returnedRequestId;
+    localStorage.setItem("ndiasLastRequestId", returnedRequestId);
+  } else {
+    const savedRequestId = localStorage.getItem("ndiasLastRequestId") || "";
+    if (savedRequestId) input.value = savedRequestId;
+  }
+
+  if (paymentReference) {
   verifyPaidCertificate(paymentReference).catch(error => {
     console.error(error);
     show("error", "Payment Confirmation Problem", "Your payment may still be processing. Please do not pay again. Keep your payment reference and contact NDIAS support if confirmation does not complete.");
